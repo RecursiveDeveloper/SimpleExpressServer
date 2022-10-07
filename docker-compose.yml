@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  express_server:
+    build: .
+    image: nodeapp:latest
+    container_name: expressapp
+    ports:
+      - 3000:3000
+    networks:
+      - intern_net
+
+networks:
+  intern_net:
+    name: intern
+    external: false
