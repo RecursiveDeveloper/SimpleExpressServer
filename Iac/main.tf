@@ -2,6 +2,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_s3_bucket" "Simple-backend" {
+  bucket  = var.bucket_name
+  acl     = var.acl
+  tags    = var.tags
+}
+
 resource "aws_instance" "Simple-instance" {
   ami             = var.ami_id
   instance_type   = var.instance_type
