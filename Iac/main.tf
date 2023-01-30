@@ -3,11 +3,27 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "Simple-backend" {
-  bucket  = var.bucket_name
-  acl     = var.acl
-  tags    = var.tags
+  bucket          = var.bucket_name
+  acl             = var.acl
+  tags            = var.tags
 }
 
+resource "aws_kms_key" "Simple-key" {
+  description             = "This key is used to encrypt bucket objects"
+  deletion_window_in_days = 10
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "Simple-sse" {
+  bucket = aws_s3_bucket.Simple-backend.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.Simple-key.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+/*
 resource "aws_instance" "Simple-instance" {
   ami             = var.ami_id
   instance_type   = var.instance_type
@@ -28,3 +44,4 @@ resource "aws_security_group" "ssh_connection" {
     }
   }
 }
+*/
