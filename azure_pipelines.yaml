@@ -1,0 +1,58 @@
+trigger:
+  - main
+
+pool:
+  - vmImage: ubuntu-latest
+
+stages:
+  stage:
+    displayName: 'Deploying example infrastructure'
+    jobs:
+      - job:
+        displayName: 'Install and check terraform'
+        steps:
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: 'Install Terraform latest'
+          - task: TerraformCLI
+            displayname: 'check terraform version'
+            inputs:
+              command: version
+      - job:
+        displayName: 'Terraform init and validate template'
+        steps:
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+            displayName: 'Terraform : init'
+            inputs:
+              provider: aws
+              command: init
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Iac'
+              backendServiceAWS: 'Iac_builder_terraform'
+              backendAWSBucketName: backend-terraform-simple
+              backendAWSKey: prod-state
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+            displayName: 'Terraform : validate'
+            inputs:
+              provider: aws
+              command: validate
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Iac'
+      - job:
+        displayName: 'Terraform plan'
+        steps:
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+            displayName: 'Terraform : plan'
+            inputs:
+              provider: aws
+              command: plan
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Iac'
+              environmentServiceNameAWS: 'Iac_builder_terraform'
+      - job:
+        displayName: 'Terraform apply'
+        steps:
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+            displayName: 'Terraform : apply'
+            inputs:
+              provider: aws
+              command: apply
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Iac'
+              environmentServiceNameAWS: 'Iac_builder_terraform'
