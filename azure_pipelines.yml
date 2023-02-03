@@ -15,7 +15,7 @@ stages:
     dependsOn: Install_terraform
     condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
-      - template: 'azure_pipelines_templates/S3_bucket.yml'
+      - template: 'azure_pipelines_templates/Build_resource.yml'
         parameters:
           directory: 'Iac/S3'
 
@@ -24,7 +24,7 @@ stages:
     dependsOn: S3_bucket_resource
     condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
-      - template: 'azure_pipelines_templates/S3_bucket.yml'
+      - template: 'azure_pipelines_templates/Build_resource.yml'
         parameters:
           directory: 'Iac/Backend_S3'
 
@@ -33,6 +33,6 @@ stages:
     dependsOn: S3_bucket_backend_state_storage
     condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
-      - template: 'azure_pipelines_templates/S3_bucket.yml'
+      - template: 'azure_pipelines_templates/Build_resource.yml'
         parameters:
           directory: 'Iac/EC2_instances'
