@@ -1,0 +1,18 @@
+jobs:
+  - job: Installation
+    displayName: 'Install terraform'
+    condition: and(always(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
+    steps:
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+        displayName: 'Terraform : install'
+
+  - job: Check_installed_version
+    displayName: 'Check terraform version'
+    dependsOn: 'Installation'
+    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
+    steps:
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+        displayName: 'Terraform : version'
+        inputs:
+          command: custom
+          customCommand: version

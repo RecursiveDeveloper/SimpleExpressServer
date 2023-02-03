@@ -1,0 +1,52 @@
+parameters:
+  - name: directory
+    type: string 
+    default: '$(System.DefaultWorkingDirectory)'
+
+jobs:
+  - job: Terraform_init
+    displayName: 'Terraform init and validate template'
+    condition: and(always(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
+    steps:
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+        displayName: 'Terraform : init'
+        inputs:
+          provider: aws
+          command: init
+          workingDirectory: '${{ parameters.directory }}'
+          backendServiceAWS: 'Iac_builder_terraform'
+          backendAWSBucketName: backend-terraform-simple
+          backendAWSKey: prod-state
+
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+        displayName: 'Terraform : validate'
+        inputs:
+          provider: aws
+          command: validate
+          workingDirectory: '${{ parameters.directory }}'
+
+  - job: Terraform_plan
+    displayName: 'Terraform plan'
+    dependsOn: 'Terraform_Init'
+    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
+    steps:
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+        displayName: 'Terraform : plan'
+        inputs:
+          provider: aws
+          command: plan
+          workingDirectory: '${{ parameters.directory }}'
+          environmentServiceNameAWS: 'Iac_builder_terraform'
+          
+  - job: Terraform_apply
+    displayName: 'Terraform apply'
+    dependsOn: 'Terraform_Plan'
+    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
+    steps:
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+        displayName: 'Terraform : apply'
+        inputs:
+          provider: aws
+          command: apply
+          workingDirectory: '${{ parameters.directory }}'
+          environmentServiceNameAWS: 'Iac_builder_terraform'
