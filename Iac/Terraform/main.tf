@@ -1,5 +1,5 @@
 module "Simple_Express_Server" {
-  source        = "./Modules/Instance"
+  source        = "./Modules"
 
   ami_id        = var.ami_id
   instance_type = var.instance_type

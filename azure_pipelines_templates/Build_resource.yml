@@ -3,52 +3,41 @@ parameters:
     type: string 
     default: '$(System.DefaultWorkingDirectory)'
 
-jobs:
-  - job: Terraform_init
-    displayName: 'Terraform init and validate template'
-    condition: and(always(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    steps:
-      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
-        displayName: 'Terraform : init'
-        inputs:
-          provider: aws
-          command: init
-          workingDirectory: '${{ parameters.directory }}'
-          backendServiceAWS: 'Iac_builder_terraform'
-          backendAWSBucketName: backend-terraform-simple
-          backendAWSKey: prod-state
+steps:
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : init'
+    inputs:
+      provider: aws
+      command: init
+      workingDirectory: '${{ parameters.directory }}'
+      backendServiceAWS: 'Iac_builder_terraform'
+      backendAWSBucketName: backend-terraform-simple
+      backendAWSKey: prod-state
 
-      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
-        displayName: 'Terraform : validate'
-        inputs:
-          provider: aws
-          command: validate
-          workingDirectory: '${{ parameters.directory }}'
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : validate'
+    condition: succeeded()
+    inputs:
+      provider: aws
+      command: validate
+      workingDirectory: '${{ parameters.directory }}'
 
-  - job: Terraform_plan
-    displayName: 'Terraform plan'
-    dependsOn: 'Terraform_init'
-    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    steps:
-      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
-        displayName: 'Terraform : plan'
-        inputs:
-          provider: aws
-          command: plan
-          commandOptions: '-out=tfplan'
-          workingDirectory: '${{ parameters.directory }}'
-          environmentServiceNameAWS: 'Iac_builder_terraform'
-          
-  - job: Terraform_apply
-    displayName: 'Terraform apply'
-    dependsOn: 'Terraform_plan'
-    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    steps:
-      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
-        displayName: 'Terraform : apply'
-        inputs:
-          provider: aws
-          command: apply
-          commandOptions: 'tfplan -auto-approve '
-          workingDirectory: '${{ parameters.directory }}'
-          environmentServiceNameAWS: 'Iac_builder_terraform'
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : plan'
+    condition: succeeded()
+    inputs:
+      provider: aws
+      command: plan
+      commandOptions: '-out=tfplan'
+      workingDirectory: '${{ parameters.directory }}'
+      environmentServiceNameAWS: 'Iac_builder_terraform'
+      
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : apply'
+    condition: succeeded()
+    inputs:
+      provider: aws
+      command: apply
+      commandOptions: '-auto-approve'
+      workingDirectory: '${{ parameters.directory }}'
+      environmentServiceNameAWS: 'Iac_builder_terraform'

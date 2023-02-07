@@ -5,34 +5,18 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-  - stage: Install_terraform
-    displayName: 'Installing Terraform and checking version'
+  - stage: Deploy_Infrastructure
+    displayName: 'Deploying AWS resources'
+    condition: and(always(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
-      - template: 'azure_pipelines_templates/Install_terraform.yml'
+      - job: Install_Check_Terraform
+        steps:
+          - template: 'azure_pipelines_templates/Install_terraform.yml'
 
-  - stage: S3_bucket_resource
-    displayName: 'Deploying S3 bucket resource'
-    dependsOn: Install_terraform
-    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    jobs:
-      - template: 'azure_pipelines_templates/Build_resource.yml'
-        parameters:
-          directory: 'Iac/S3'
-
-  - stage: S3_bucket_backend_state_storage
-    displayName: 'Turning S3 bucket resource into backend state'
-    dependsOn: S3_bucket_resource
-    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    jobs:
-      - template: 'azure_pipelines_templates/Build_resource.yml'
-        parameters:
-          directory: 'Iac/Backend_S3'
-
-  - stage: EC2_instance_resource
-    displayName: 'Deploying EC2 instance resource'
-    dependsOn: S3_bucket_backend_state_storage
-    condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
-    jobs:
-      - template: 'azure_pipelines_templates/Build_resource.yml'
-        parameters:
-          directory: 'Iac/EC2_instances'
+      - job: Deploy_Resources
+        dependsOn: Install_Check_Terraform
+        condition: succeeded()
+        steps:
+          - template: 'azure_pipelines_templates/Build_resource.yml'
+            parameters:
+              directory: 'Iac/Terraform'
