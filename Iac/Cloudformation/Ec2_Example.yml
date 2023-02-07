@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: >
+  Este stack va a crear una instancia
+  y todo lo que necesita
+
+Resources:
+  webServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: 'ami-0aa7d40eeae50c9a9'
+      InstanceType: 't2.micro'
+      KeyName: 'keypair-p2'
+      SecurityGroupIds:
+        - Ref: SecurityGroupSSH
+
+  SecurityGroupSSH:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Security group para acceso SSH'
+      GroupName: 'SSHSecurityGroup'
+      VpcId: 'vpc-08f225422c3ed465b'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0

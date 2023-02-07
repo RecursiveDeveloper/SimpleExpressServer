@@ -27,7 +27,7 @@ jobs:
 
   - job: Terraform_plan
     displayName: 'Terraform plan'
-    dependsOn: 'Terraform_Init'
+    dependsOn: 'Terraform_init'
     condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     steps:
       - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
@@ -35,12 +35,13 @@ jobs:
         inputs:
           provider: aws
           command: plan
+          commandOptions: '-out=tfplan'
           workingDirectory: '${{ parameters.directory }}'
           environmentServiceNameAWS: 'Iac_builder_terraform'
           
   - job: Terraform_apply
     displayName: 'Terraform apply'
-    dependsOn: 'Terraform_Plan'
+    dependsOn: 'Terraform_plan'
     condition: and(succeeded(), contains(variables['build.sourceBranch'], 'refs/heads/main'))
     steps:
       - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
@@ -48,5 +49,6 @@ jobs:
         inputs:
           provider: aws
           command: apply
+          commandOptions: 'tfplan -auto-approve '
           workingDirectory: '${{ parameters.directory }}'
           environmentServiceNameAWS: 'Iac_builder_terraform'

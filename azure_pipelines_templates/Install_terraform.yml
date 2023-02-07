@@ -14,5 +14,7 @@ jobs:
       - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
         displayName: 'Terraform : version'
         inputs:
+          provider: aws
           command: custom
           customCommand: version
+          environmentServiceNameAWS: 'Iac_builder_terraform'
