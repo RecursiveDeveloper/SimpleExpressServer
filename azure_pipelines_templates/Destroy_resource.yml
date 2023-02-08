@@ -5,6 +5,16 @@ parameters:
 
 steps:
   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : init'
+    inputs:
+      provider: aws
+      command: init
+      workingDirectory: '${{ parameters.directory }}'
+      backendServiceAWS: 'Iac_builder_terraform'
+      backendAWSBucketName: backend-terraform-simple
+      backendAWSKey: prod-state
+      
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
     displayName: 'Terraform : destroy'
     inputs:
       provider: aws
