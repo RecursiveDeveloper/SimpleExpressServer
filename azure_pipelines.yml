@@ -23,7 +23,7 @@ stages:
         steps:
           - template: 'azure_pipelines_templates/Build_resource.yml'
             parameters:
-              directory: terraformDirectory
+              directory: '${{ variables.terraformDirectory }}'
       
       - job: waitForValidation
         displayName: 'Wait for external validation'
@@ -44,4 +44,4 @@ stages:
         steps:
           - template: 'azure_pipelines_templates/Destroy_resource.yml'
             parameters:
-              directory: terraformDirectory
+              directory: '${{ variables.terraformDirectory }}'
