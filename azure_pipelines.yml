@@ -24,8 +24,11 @@ stages:
           - template: 'azure_pipelines_templates/Build_resource.yml'
             parameters:
               directory: terraformDirectory
-
-      - job: Manual_Validation
+      
+      - job: waitForValidation
+        displayName: 'Wait for external validation'
+        pool: server
+        timeoutInMinutes: 4320 # job times out in 3 days
         dependsOn: Deploy_Resources
         condition: succeeded()
         steps:
@@ -36,7 +39,7 @@ stages:
               onTimeout: 'reject'
 
       - job: Destroy_Resources
-        dependsOn: Manual_Validation
+        dependsOn: waitForValidation
         condition: succeeded()
         steps:
           - template: 'azure_pipelines_templates/Destroy_resource.yml'
