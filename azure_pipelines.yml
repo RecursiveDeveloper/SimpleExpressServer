@@ -4,6 +4,10 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+ - name: terraformDirectory
+   value: 'Iac/Terraform'
+
 stages:
   - stage: Deploy_Infrastructure
     displayName: 'Deploying AWS resources'
@@ -19,4 +23,22 @@ stages:
         steps:
           - template: 'azure_pipelines_templates/Build_resource.yml'
             parameters:
-              directory: 'Iac/Terraform'
+              directory: terraformDirectory
+
+      - job: Manual_Validation
+        dependsOn: Deploy_Resources
+        condition: succeeded()
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440 # task times out in 1 day
+            inputs:
+              instructions: 'Please validate if you want to destroy the deployed infrastructured'
+              onTimeout: 'reject'
+
+      - job: Destroy_Resources
+        dependsOn: Manual_Validation
+        condition: succeeded()
+        steps:
+          - template: 'azure_pipelines_templates/Destroy_resource.yml'
+            parameters:
+              directory: terraformDirectory
