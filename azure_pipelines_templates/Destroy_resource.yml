@@ -1,0 +1,14 @@
+parameters:
+  - name: directory
+    type: string 
+    default: '$(System.DefaultWorkingDirectory)'
+
+steps:
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV3@3
+    displayName: 'Terraform : destroy'
+    inputs:
+      provider: aws
+      command: destroy
+      workingDirectory: '${{ parameters.directory }}'
+      commandOptions: '-auto-approve'
+      environmentServiceNameAWS: 'Iac_builder_terraform'
