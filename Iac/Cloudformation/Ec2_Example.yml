@@ -4,16 +4,31 @@ Description: >
   Este stack va a crear una instancia
   y todo lo que necesita
 
-Resources:
-  webServer:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: 'ami-0aa7d40eeae50c9a9'
-      InstanceType: 't2.micro'
-      KeyName: 'keypair-p2'
-      SecurityGroupIds:
-        - Ref: SecurityGroupSSH
+Outputs:
+  InstanceId:
+    Description: 'Id from created instance'
+    Value: !Ref WebServer
 
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: 't2.micro'
+    AllowedValues:
+      - t2.micro
+      - t1.micro
+      - m1.small
+      - m1.large
+
+  InstanceAmiParameter:
+    Type: String
+    Default: 'ami-0dfcb1ef8550277af'
+    AllowedValues:
+      - ami-0dfcb1ef8550277af
+      - ami-065bb5126e4504910
+      - ami-0557a15b87f6559cf
+      - ami-09cd747c78a9add63
+
+Resources:
   SecurityGroupSSH:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -25,8 +40,42 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
           FromPort: 0
           ToPort: 0
           CidrIp: 0.0.0.0/0
+  
+  keyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: 'WebServerKeyPair'
+      KeyType: 'rsa'
+
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref InstanceAmiParameter
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName: !Ref keyPair
+      SecurityGroupIds: 
+        - !Ref SecurityGroupSSH
+      UserData: 
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+          yum install -y httpd mariadb-server
+          systemctl start httpd
+          systemctl enable httpd
+          usermod -a -G apache ec2-user
+          chown -R ec2-user:apache /var/www
+          chmod 2775 /var/www
+          find /var/www -type d -exec chmod 2775 {} \;
+          find /var/www -type f -exec chmod 0664 {} \;
+          echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+        
