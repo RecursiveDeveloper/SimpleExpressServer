@@ -4,29 +4,12 @@ Description: >
   Este stack va a crear una instancia
   y todo lo que necesita
 
-Outputs:
-  InstanceId:
-    Description: 'Id from created instance'
-    Value: !Ref WebServer
-
 Parameters:
   InstanceTypeParameter:
     Type: String
-    Default: 't2.micro'
-    AllowedValues:
-      - t2.micro
-      - t1.micro
-      - m1.small
-      - m1.large
 
   InstanceAmiParameter:
     Type: String
-    Default: 'ami-0dfcb1ef8550277af'
-    AllowedValues:
-      - ami-0dfcb1ef8550277af
-      - ami-065bb5126e4504910
-      - ami-0557a15b87f6559cf
-      - ami-09cd747c78a9add63
 
 Resources:
   SecurityGroupSSH:
@@ -65,17 +48,50 @@ Resources:
       SecurityGroupIds: 
         - !Ref SecurityGroupSSH
       UserData: 
-        Fn::Base64: !Sub |
+        Fn::Base64: |
           #!/bin/bash
-          yum update -y
-          amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-          yum install -y httpd mariadb-server
-          systemctl start httpd
-          systemctl enable httpd
-          usermod -a -G apache ec2-user
-          chown -R ec2-user:apache /var/www
-          chmod 2775 /var/www
-          find /var/www -type d -exec chmod 2775 {} \;
-          find /var/www -type f -exec chmod 0664 {} \;
-          echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
-        
+          sudo apt update -y
+          sudo apt install nginx -y
+
+          cd /var/www
+          sudo mkdir tutorial
+          cd tutorial
+          
+          sudo tee -a index.html <<EOF
+            <!doctype html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Hello, Nginx!</title>
+            </head>
+            <body>
+              <h1>Hello, Nginx!</h1>
+              <p>We have just configured our Nginx web server on Ubuntu Server!</p>
+            </body>
+            </html>
+          EOF
+
+          cd /etc/nginx/sites-enabled
+
+          sudo tee -a tutorial <<EOF
+            server {
+              listen 80;
+              listen [::]:80;
+          
+              server_name example.ubuntu.com;
+          
+              root /var/www/tutorial;
+              index index.html;
+          
+              location / {
+                      try_files $uri $uri/ =404;
+              }
+            }
+          EOF
+
+          sudo service nginx restart
+
+Outputs:
+  InstanceId:
+    Description: 'Id from created instance'
+    Value: !Ref WebServer

@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          default: "Amazon EC2 Configuration"
+        Parameters: 
+          - InstanceTypeParameter
+          - InstanceAmiParameter
+      
+      -
+        Label:
+          default: "DynamoDB Configuration"
+        Parameters:
+          - DynamoAtributo
+          - NombreDynamo
+
+      -
+        Label:
+          default: "S3 URL nested templates"
+        Parameters:
+          - EC2TemplateUrl
+          - DynamoTemplateUrl
+
+    ParameterLabels:
+      InstanceTypeParameter:
+        default: "Which instance type do you want to deploy?"
+      InstanceAmiParameter:
+        default: "Which instance AMI do you want to deploy?"
+      DynamoAtributo:
+        default: "DynamoDB attribute name"
+      NombreDynamo:
+        default: "DynamoDB table name"
+      EC2TemplateUrl:
+        default: "Enter Ec2 template url from S3"
+      DynamoTemplateUrl:
+        default: "Enter DynamoDB template url from S3"
+
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: 't2.micro'
+    AllowedValues:
+      - t2.micro
+      - t1.micro
+      - m1.small
+      - m1.large
+
+  InstanceAmiParameter:
+    Type: String
+    Default: 'ami-0dfcb1ef8550277af'
+    AllowedValues:
+      - ami-0dfcb1ef8550277af
+      - ami-065bb5126e4504910
+      - ami-0557a15b87f6559cf
+      - ami-09cd747c78a9add63
+
+  DynamoAtributo:
+    Type: String
+
+  NombreDynamo:
+    Type: String
+
+  EC2TemplateUrl:
+    Type: String
+
+  DynamoTemplateUrl:
+    Type: String
+
+Resources:
+  Ec2Instance:
+    Type: AWS::CloudFormation::Stack
+    Properties: 
+      Parameters: 
+        InstanceTypeParameter: !Ref InstanceTypeParameter
+        InstanceAmiParameter: !Ref InstanceAmiParameter
+      TemplateURL: !Ref EC2TemplateUrl
+
+  DynamoDB:
+    Type: AWS::CloudFormation::Stack
+    Properties: 
+      Parameters: 
+        DynamoAtributo: !Ref DynamoAtributo
+        NombreDynamo: !Ref NombreDynamo
+      TemplateURL: !Ref DynamoTemplateUrl
