@@ -1,10 +1,7 @@
 #!/bin/bash
 
-echo -e "\nDeleting old resources\n"
-minikube delete --all
-
 echo -e "\nCreating new resources\n"
-minikube start -n 3 -p demo
+minikube start -n 2 -p demo
 
 echo -e "\nCreating new deployment resources\n"
 kubectl create deployment redis --image=redis

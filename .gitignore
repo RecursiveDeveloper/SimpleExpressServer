@@ -1,4 +1,4 @@
-/node_modules
+*/node_modules
 
 .editorconfig
 
@@ -7,5 +7,5 @@
 terraform*
 
 env.sh
-
+*.env
 env/
