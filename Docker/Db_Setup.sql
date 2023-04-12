@@ -1,8 +1,3 @@
-/*
-ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'secret';
-flush privileges;
-*/
-
 CREATE DATABASE nodedb;
 USE nodedb;
 
