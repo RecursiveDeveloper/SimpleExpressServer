@@ -15,13 +15,13 @@ stages:
     jobs:
       - job: Install_Check_Terraform
         steps:
-          - template: 'azure_pipelines_templates/Install_terraform.yml'
+          - template: 'azure_pipelines_templates/Infrastructure/Install_terraform.yml'
 
       - job: Deploy_Resources
         dependsOn: Install_Check_Terraform
         condition: succeeded()
         steps:
-          - template: 'azure_pipelines_templates/Build_resource.yml'
+          - template: 'azure_pipelines_templates/Infrastructure/Build_resource.yml'
             parameters:
               directory: '${{ variables.terraformDirectory }}'
       
@@ -42,6 +42,6 @@ stages:
         dependsOn: waitForValidation
         condition: succeeded()
         steps:
-          - template: 'azure_pipelines_templates/Destroy_resource.yml'
+          - template: 'azure_pipelines_templates/Infrastructure/Destroy_resource.yml'
             parameters:
               directory: '${{ variables.terraformDirectory }}'
