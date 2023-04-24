@@ -39,8 +39,15 @@ stages:
               onTimeout: 'reject'
 
       - job: Destroy_Resources
-        dependsOn: waitForValidation
-        condition: succeeded()
+        dependsOn: 
+          - waitForValidation
+          - Deploy_Resources
+        condition: |
+          or
+          (
+            eq(dependencies.waitForValidation.result, 'Succeeded'),
+            eq(dependencies.Deploy_Resources.result, 'failed')
+          )
         steps:
           - template: 'azure_pipelines_templates/Infrastructure/Destroy_resource.yml'
             parameters:
