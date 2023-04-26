@@ -43,12 +43,24 @@ sudo apt-get install docker-compose-plugin
 
 
 echo -e "\n**********************************************"
+echo "Copying Repository"
+echo -e "**********************************************\n"
+git clone https://github.com/RecursiveDeveloper/SimpleExpressServer.git
+
+
+echo -e "\n**********************************************"
 echo "Copying files from S3 bucket"
 echo -e "**********************************************\n"
 
-#sudo aws s3 cp s3://example-s31 ./ --recursive
-git clone https://github.com/RecursiveDeveloper/SimpleExpressServer.git
+DOCKER_PATH="SimpleExpressServer/Docker/Simple_Server_App/"
+SERVER_PATH="SimpleExpressServer/Server/"
 
+sudo aws s3 cp s3://example-s31/.env        ./$SERVER_PATH
+sudo aws s3 cp s3://example-s31/.env.dev    ./$DOCKER_PATH
+
+
+echo -e "\n**********************************************"
+echo "Initializing Services"
+echo -e "**********************************************\n"
 cd SimpleExpressServer/Docker/Simple_Server_App
-
 sudo bash Services_Up.sh
