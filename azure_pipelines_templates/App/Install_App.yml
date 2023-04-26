@@ -1,0 +1,17 @@
+parameters:
+  - name: directory
+    type: string 
+    default: '$(System.DefaultWorkingDirectory)'
+
+steps:
+  - task: DownloadSecureFile@1
+    name: varEnvFile
+    displayName: 'Downloading envFile variables'
+    inputs:
+      secureFile: '.env.dev'
+
+  - script: |
+      echo Installing $(caCertificate.secureFilePath) to the trusted CA directory...
+      sudo chown root:root $(caCertificate.secureFilePath)
+      sudo chmod a+r $(caCertificate.secureFilePath)
+      sudo ln -s -t /etc/ssl/certs/ $(caCertificate.secureFilePath)

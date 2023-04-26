@@ -27,8 +27,8 @@ services:
       mysql_server:
         condition: service_healthy
     build: 
-      context: ../Server
-      dockerfile: ../Docker/dockerfile_EXP
+      context: ../../Server
+      dockerfile: ../Docker/Simple_Server_App/dockerfile_EXP
     image: ${EXP_IMAGE_NAME}:v0.1
     container_name: ${EXP_CONTAINER_NAME}
     restart: unless-stopped

@@ -8,38 +8,39 @@ dotenv.config();
 const {connection} = require("../config.db");
 
 const getCarta = (request, response) => {
-    connection.query("SELECT * FROM carta", 
+    connection.query("SELECT * FROM manager", 
     (error, results) => {
         if(error)
             throw error;
         response.status(200).json(results);
     });
 };
-
 //ruta
-app.route("/carta")
+app.route("/manager")
 .get(getCarta);
 
-
 const postCarta = (request, response) => {
-    const {plato, descripcion, precio, disponible} = request.body;
-    connection.query("INSERT INTO carta(plato, descripcion, precio, disponible) VALUES (?,?,?,?) ", 
-    [plato, descripcion, precio, disponible],
+    const {manager_id, first_name, last_name, last_update} = request.body;
+    connection.query(
+        `INSERT INTO manager
+        (plato, descripcion, precio, disponible) 
+        VALUES 
+        (?,?,?,?) `, 
+        [manager_id, first_name, last_name, last_update],
     (error, results) => {
         if(error)
             throw error;
         response.status(201).json({"Item añadido correctamente": results.affectedRows});
     });
 };
-
 //ruta
-app.route("/carta")
+app.route("/manager")
 .post(postCarta);
 
 
 const delCarta = (request, response) => {
     const id = request.params.id;
-    connection.query("Delete from carta where id = ?", 
+    connection.query("Delete from manager where manager_id = ?", 
     [id],
     (error, results) => {
         if(error)
@@ -47,10 +48,8 @@ const delCarta = (request, response) => {
         response.status(201).json({"Item eliminado":results.affectedRows});
     });
 };
-
 //ruta
-app.route("/carta/:id")
+app.route("/manager/:id")
 .delete(delCarta);
-
 
 module.exports = app;

@@ -2,13 +2,15 @@ version: '3.8'
 
 volumes:
   jenkins_home:
+    name: ${JK_VOLUME_NAME}
 
 services:
   jenkins:
     image: jenkins/jenkins:lts-jdk11
+    container_name: ${JK_CONTAINER_NAME}
     ports:
-      - "8080:8080"
-      - "50000:50000"
+      - "${JK_LOCAL_PORT1}:8080"
+      - "${JK_LOCAL_PORT2}:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
     restart: on-failure

@@ -6,7 +6,7 @@ DELIMITER @@
 DROP PROCEDURE IF EXISTS create_table_populate;
 CREATE PROCEDURE IF NOT EXISTS create_table_populate()
 BEGIN
-    CREATE TABLE IF NOT EXISTS carta (
+    CREATE TABLE IF NOT EXISTS manager (
         manager_id varchar(45) NOT NULL,
         first_name varchar(45) NOT NULL,
         last_name varchar(45) NOT NULL,
@@ -14,7 +14,7 @@ BEGIN
         PRIMARY KEY (manager_id)
     );
 
-    INSERT INTO carta
+    INSERT INTO manager
         (manager_id, first_name, last_name, last_update)
     VALUES
         (08276,'Brad','Craven',"1976-11-29"),

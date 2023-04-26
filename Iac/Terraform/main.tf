@@ -6,6 +6,7 @@ module "Simple_Express_Server" {
   tags          = var.tags
   sg_name       = var.sg_name
   ingress_rule  = var.ingress_rule
+  egress_rule   = var.egress_rule
   bucket_name   = var.bucket_name
   acl           = var.acl
 }

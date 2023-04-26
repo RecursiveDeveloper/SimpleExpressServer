@@ -5,8 +5,14 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
- - name: terraformDirectory
-   value: 'Iac/Terraform'
+  - name: terraformDirectory
+    value: 'Iac/Terraform'
+  - name: infraDirectory
+    value:  'azure_pipelines_templates/Infrastructure'
+  - name: appDirectory
+    value: 'azure_pipelines_templates/App'
+  - name: envFile
+    value: '.env.dev'
 
 stages:
   - stage: Deploy_Infrastructure
@@ -15,21 +21,29 @@ stages:
     jobs:
       - job: Install_Check_Terraform
         steps:
-          - template: 'azure_pipelines_templates/Infrastructure/Install_terraform.yml'
+          - template: '${{ infraDirectory }}/Install_terraform.yml'
 
       - job: Deploy_Resources
         dependsOn: Install_Check_Terraform
         condition: succeeded()
         steps:
-          - template: 'azure_pipelines_templates/Infrastructure/Build_resource.yml'
+          - template: '${{ infraDirectory }}/Build_resource.yml'
             parameters:
               directory: '${{ variables.terraformDirectory }}'
       
+      - job: Serve_App
+        dependsOn: Deploy_Resources
+        condition: succeeded()
+        steps:
+          - template: '${{ appDirectory }}/Install_App.yml'
+            parameters:
+              directory: '${{ variables.envFile }}'
+
       - job: waitForValidation
         displayName: 'Wait for external validation'
         pool: server
         timeoutInMinutes: 4320 # job times out in 3 days
-        dependsOn: Deploy_Resources
+        dependsOn: Serve_App
         condition: succeeded()
         steps:
           - task: ManualValidation@0
@@ -42,13 +56,15 @@ stages:
         dependsOn: 
           - waitForValidation
           - Deploy_Resources
+          - Serve_App
         condition: |
           or
           (
             eq(dependencies.waitForValidation.result, 'Succeeded'),
-            eq(dependencies.Deploy_Resources.result, 'failed')
+            eq(dependencies.Deploy_Resources.result, 'failed'),
+            eq(dependencies.Serve_App.result, 'failed')
           )
         steps:
-          - template: 'azure_pipelines_templates/Infrastructure/Destroy_resource.yml'
+          - template: '${{ infraDirectory }}/Destroy_resource.yml'
             parameters:
               directory: '${{ variables.terraformDirectory }}'
