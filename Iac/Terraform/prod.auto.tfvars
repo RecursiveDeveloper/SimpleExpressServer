@@ -22,6 +22,12 @@ ingress_rule    = [
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     },
+    {
+        from_port   = "3000"
+        to_port     = "3000"
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
 ]
 
 egress_rule     = [
